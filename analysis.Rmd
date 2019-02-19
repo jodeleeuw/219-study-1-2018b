@@ -528,3 +528,44 @@ BF for full model vs. main effects only.
 extractBF(bf.anova.lateral)$bf[1] / extractBF(bf.anova.lateral)$bf[4]
 extractBF(bf.anova.lateral)$bf[4] / extractBF(bf.anova.lateral)$bf[3]
 ```
+
+# Supplemental Analysis: RATN
+
+At the request of a reviewer, this is a *non-preregistered* analysis of the right-anterior temporal negativity reported by Patel et al., who state:
+
+> A new and interesting result is the observation of a brief right-hemisphere negativity in response to out-of-key target chords (N350). Previous studies of music perception using ERPs have often commented on the difference between negativities produced by violations of semantic expectancy in language (e.g., the N400) and positivities produced by violations of musical expectancy (e.g., Besson & Macar, 1987; Paller, McCarthy, & Wood,1992; see Besson,1997 for a review). Although the N350 does not resemble the semantic N400 (which differs in symmetry, duration, and scalp distribution), it is interestingly reminiscent of another ERP component recently associated with syntactic processing, the left anterior negativity, or LAN. The LAN, whose amplitude tends to be largest in the vicinity of Broca’s area in the left hemisphere, has been associated with violations of grammatical rules (Friederici & Mecklinger, 1996; Neville et al., 1991) and with an increase in working memory associated with the processing of disjunct syntactic dependencies (King & Kutas, 1995; Kluender & Kutas, 1993). Like the LAN, the N350 shows a significant condition x hemisphere x electrode site interaction in statistical analyses, reflecting an anterior-posterior asym- metry in its distribution. Unlike, the LAN, however, the N350 has an antero-temporal distribution and should thus perhaps be called the “right antero-temporal negativity,” or RATN.It is tempting to speculate that the RATN reflects the application of music-specific syntactic rules or music-specific working memory resources, especially because right fronto-temporal circuits have been implicated in working memory for tonal material (Zattore, Evans, & Meyer, 1994). However, more accurate characterization of this component will have to await future investigation. Here we simply note that the elicitation of this component in our study, in contrast to other recent studies of music perception using ERPs (e.g., Besson & Faïta, 1995, Janata, 1995), may be due to our use of musical phrases with chordal harmony and sequenceinternal (versus sequence-final) targets.
+
+The key statistical result supporting the existence of the RATN is (from the original Patel et al.): 
+
+> A hemispheric asymmetry developed in the 300 to 500- msec window, as revealed by the significant condition x hemisphere x electrode site interaction in the overall ANOVA for this time range. Follow-up comparisons showed that this interaction was also present in the 300 to 400-msec range (F(8, 112) = 5.29, p < 0.01), where a negative peak (N350) can be seen at frontal and temporal sites in the right hemisphere to the two out-of-key target chords. Pairwise analyses between conditions during this time window revealed that the three-way inter- action was significant for A versus C (F(4, 56) = 8.79, p <0.01) and marginally significant for A versus B (F(4, 56) = 3.30, p < 0.07) and B versus C (F(4, 56) = 3.01, p < 0.07). These data suggest a specifically right-hemi- sphere effect for the two out-of-key chords. In contrast to this right hemisphere N350, later positive compo- nents were quite symmetrical and showed no significant interactions of condition ´ hemisphere in any of the latency windows.
+
+Here we run the hemisphere x condition x electrode model for the 300-400ms window.
+
+```{r message=FALSE, warning=FALSE}
+RATN.time.window <- 300:400
+
+eeg_data_RATN <- eeg.data %>% 
+  filter(electrode %in% lateral.electrodes, t %in% RATN.time.window, stimulus.condition=='Music') %>% 
+  mutate(hemisphere = ifelse(electrode %in% c(33,39,42,45,70), "left", "right")) %>% mutate(electrode.site = ifelse(electrode %in% c(33,122),"F", ifelse(electrode %in% c(39,115),"A", ifelse(electrode %in% c(42,93),"W", ifelse(electrode %in% c(45,108),"T","O"))))) %>% 
+  group_by(subject, electrode.site, grammar.condition, hemisphere) %>% summarize(mean.amplitude = mean(voltage))
+                                  
+RATN.anova <- ezANOVA(eeg_data_RATN, dv=mean.amplitude, wid=subject, within = c('electrode.site', 'grammar.condition', 'hemisphere'))
+RATN.anova$ANOVA
+```
+
+Unlike Patel et al., we do not find a significant three-way interaction. 
+
+We followed this up with a Bayes Factor ANOVA, comparing the subject-only model to the full three-way interaction model. The subject-only model is overwhelmingly preferred.
+
+```{r}
+eeg_data_RATN$electrode.site <- as.factor(eeg_data_RATN$electrode.site)
+eeg_data_RATN$hemisphere <- as.factor(eeg_data_RATN$hemisphere)
+bf.anova.RATN <- anovaBF(mean.amplitude ~ electrode.site * grammar.condition * hemisphere + subject, data=data.frame(eeg_data_RATN), whichRandom = "subject")
+1/bf.anova.RATN[18]
+```
+
+Looking at the full set of models, the model with the most support is the grammar.condition + subject model, which suggests that there may be a main effect of grammar in the 300-400ms window, but that such an effect is roughly uniform across electrode sites and not localized to right anterior sites.
+
+```{r}
+summary(bf.anova.RATN)
+```
