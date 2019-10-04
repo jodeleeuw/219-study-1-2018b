@@ -99,22 +99,22 @@ eeg.data <- read_csv('data/generated/eeg_data_tidy.csv', col_types = cols(electr
 
 Calculate grand average waveforms for language. Display the grand averages in approximate topographic locations. Shading on plots represents +/- 1 SE.
 
-```{r fig.height=7, fig.width=8, message=FALSE, warning=FALSE}
+```{r fig.height=4, fig.width=8, message=FALSE, warning=FALSE}
 library(ggplot2)
 
 electrode.locations <- data.frame(electrode = character(), name = character(), x = numeric(), y= numeric()) %>%
-  rbind(data.frame(electrode="11", name = "Fz (11)", x=8/16, y=11/16)) %>%
-  rbind(data.frame(electrode="33", name = "F7 (33)", x=4/16, y=10.7/16)) %>%
-  rbind(data.frame(electrode="39", name = "ATL (39)", x=3.3/16, y=9.2/16)) %>%
-  rbind(data.frame(electrode="42", name = "WL (42)", x=5.8/16, y=7/16)) %>%
-  rbind(data.frame(electrode="45", name = "TL (45)", x=3.2/16, y=7.5/16)) %>%
-  rbind(data.frame(electrode="62", name = "Pz (62)", x=8/16, y=5.5/16)) %>%
-  rbind(data.frame(electrode="70", name = "O1 (70)", x=6.5/16, y=4/16)) %>%
-  rbind(data.frame(electrode="83", name = "O2 (83)", x=9.5/16, y=4/16)) %>%
-  rbind(data.frame(electrode="93", name = "WR (93)", x=10.2/16, y=7/16)) %>%
-  rbind(data.frame(electrode="108", name = "TR (108)", x=12.8/16, y=7.5/16)) %>%
-  rbind(data.frame(electrode="115", name = "ATR (115)", x=12.7/16, y=9.2/16)) %>%
-  rbind(data.frame(electrode="122", name = "F8 (122)", x=12/16, y=10.7/16)) %>%
+  rbind(data.frame(electrode="11", name = "Fz (11)", x=8/16, y=12/16)) %>%
+  rbind(data.frame(electrode="33", name = "F7 (33)", x=5/16, y=12/16)) %>%
+  rbind(data.frame(electrode="39", name = "ATL (39)", x=2/16, y=12/16)) %>%
+  rbind(data.frame(electrode="42", name = "WL (42)", x=5/16, y=8/16)) %>%
+  rbind(data.frame(electrode="45", name = "TL (45)", x=2/16, y=8/16)) %>%
+  rbind(data.frame(electrode="62", name = "Pz (62)", x=8/16, y=4/16)) %>%
+  rbind(data.frame(electrode="70", name = "O1 (70)", x=5/16, y=4/16)) %>%
+  rbind(data.frame(electrode="83", name = "O2 (83)", x=11/16, y=4/16)) %>%
+  rbind(data.frame(electrode="93", name = "WR (93)", x=11/16, y=8/16)) %>%
+  rbind(data.frame(electrode="108", name = "TR (108)", x=14/16, y=8/16)) %>%
+  rbind(data.frame(electrode="115", name = "ATR (115)", x=14/16, y=12/16)) %>%
+  rbind(data.frame(electrode="122", name = "F8 (122)", x=11/16, y=12/16)) %>%
   rbind(data.frame(electrode="129", name = "Cz (129)", x=8/16, y=8/16))
 
 grand.average.data <- eeg.data %>% group_by(t, electrode, stimulus.condition, grammar.condition) %>%
@@ -124,15 +124,15 @@ make.plot <- function(plotting.data){
   p <- ggplot(plotting.data, aes(x=t, y=mean.voltage, color=grammar.condition))+
     scale_color_brewer(name="Grammar", type="qual", palette="Set1", guide=F)+
     scale_fill_brewer(guide=F, type="qual", palette="Set1")+
-    annotate("rect", xmin=500,xmax=800,ymin=-2,ymax=2,fill='black',alpha=0.25)+
+    annotate("rect", xmin=500,xmax=800,ymin=-2,ymax=2,fill='black',alpha=0.2)+
     coord_cartesian(ylim=c(min(grand.average.data$mean.voltage), max(grand.average.data$mean.voltage)))+
-    geom_ribbon(mapping=aes(ymin=mean.voltage - se.voltage, ymax = mean.voltage + se.voltage, fill=grammar.condition), color=NA, alpha = 0.4)+
-    geom_line()+
     geom_vline(xintercept=0)+
     geom_hline(yintercept=0)+
     geom_segment(data = ticks, aes(x=x,y=y,xend=xend,yend=yend), color="black")+ 
     geom_segment(x=-50, y=2, xend=0,yend=2, color="black")+
     geom_segment(x=-50, y=-2, xend=0,yend=-2, color="black")+
+    geom_ribbon(mapping=aes(ymin=mean.voltage - se.voltage, ymax = mean.voltage + se.voltage, fill=grammar.condition), color=NA, alpha = 0.4)+
+    geom_line()+
     theme_void()
   return(p)
 }
@@ -144,7 +144,7 @@ legend.plot <- ggplot(grand.average.data, aes(x=t,y=mean.voltage,color=grammar.c
   theme_void()+
   geom_vline(xintercept=0)+
   geom_hline(yintercept=0)+
-  annotate("rect", xmin=500,xmax=800,ymin=-2,ymax=2,fill='black',alpha=0.25)+
+  annotate("rect", xmin=500,xmax=800,ymin=-2,ymax=2,fill='black',alpha=0.2)+
   scale_color_brewer(guide=F)+
   geom_segment(data = ticks, aes(x=x,y=y,xend=xend,yend=yend), color="black")+ 
   annotate("text", label="500", x=500, y = -1.0, size=3)+
@@ -154,8 +154,8 @@ legend.plot <- ggplot(grand.average.data, aes(x=t,y=mean.voltage,color=grammar.c
   coord_cartesian(ylim=c(min(grand.average.data$mean.voltage), max(grand.average.data$mean.voltage)), xlim=c(-100,1100))
 
 condition.legend <- (ggplot(grand.average.data, aes(x=t,y=mean.voltage,color=grammar.condition))+
-  geom_line()+
-  theme_minimal(base_size = 11)+
+  geom_line(size=1)+
+  theme_minimal(base_size = 12)+
   scale_color_brewer(palette="Set1", type="seq", name=NULL)) %>%
   get_legend()
 
@@ -167,8 +167,8 @@ scale.factor.y <- (1 / (max(plots$y) - min(plots$y))) * 0.8
 plots$x <- (plots$x - 0.5) * scale.factor.x + 0.5
 plots$y <- (plots$y - 0.5) * scale.factor.y + 0.5
 
-x.size <- .2
-y.size <- .15
+x.size <- .17
+y.size <- .25
 
 
 language.data <- plots %>% filter(stimulus.condition == "Language")
@@ -181,19 +181,19 @@ for(i in 1:nrow(language.data)){
   
   language.scalp <- language.scalp + 
     annotation_custom( grob = ggplotGrob(language.data$plot[[i]]), xmin = language.data$x[[i]] - x.size/2, xmax = language.data$x[[i]] + x.size/2, ymin = language.data$y[[i]] - y.size/2, ymax = language.data$y[[i]] + y.size/2) +
-    annotation_custom(grob = textGrob(language.data$name[[i]]), xmin = language.data$x[[i]] - x.size/2, xmax = language.data$x[[i]] + x.size/2, ymin = language.data$y[[i]] + y.size/2, ymax = language.data$y[[i]] + y.size/2 + 0.02)
+    annotation_custom(grob = textGrob(language.data$name[[i]], just="center", gp=gpar(fontsize=10)), xmin = language.data$x[[i]] - x.size/2, xmax = language.data$x[[i]] + x.size/2, ymin = language.data$y[[i]] + y.size/2, ymax = language.data$y[[i]] + y.size/2 + 0.02)
 
 }
 
 language.scalp <- language.scalp + 
-  annotation_custom(grob = ggplotGrob(legend.plot), xmin = 1.0 - x.size, xmax=1.0, ymin = 0, ymax= y.size) +
-  annotation_custom(grob = textGrob("Time since stimulus onset (ms)", just="right", gp=gpar(fontsize=10)), xmin = .94, xmax =1.13 , ymin =-0.04 , ymax = -0.03 ) +
-  annotation_custom(grob = textGrob(expression("ERP amplitude ("*mu*"v)"), rot=90, gp=gpar(fontsize=10)), xmin = .74, xmax =.79 , ymin =0.04 , ymax = 0.1 ) +
-  annotation_custom(grob = textGrob(expression("+2"), gp=gpar(fontsize=8)), xmin = .80, xmax =.81 , ymin =0.12 , ymax = 0.13 ) +
-  annotation_custom(grob = textGrob(expression("-2"), gp=gpar(fontsize=8)), xmin = .80, xmax =.81 , ymin =0.02 , ymax = 0.03 ) +
-  annotation_custom(grob = condition.legend, xmin = 0.85, xmax = 1.0, ymin= 0.10, ymax = 0.25)
+  annotation_custom(grob = ggplotGrob(legend.plot), xmin = (0.1)-(x.size/2), xmax=0.1+(x.size/2), ymin = 0.1-y.size/2, ymax = 0.1+(y.size/2)) +
+  annotation_custom(grob = textGrob("Time since stimulus onset (ms)", just="center", gp=gpar(fontsize=8)), xmin = (2/16)-(x.size/2), xmax =(2/16)+(x.size/2) , ymin =-0.04 , ymax = -0.03 ) +
+  annotation_custom(grob = textGrob(expression("Amplitude ("*mu*"v)"), rot=90, gp=gpar(fontsize=8)), xmin = -0.03, xmax =0.0 , ymin =0.03 , ymax = 0.17 ) +
+  annotation_custom(grob = textGrob(expression("+2"), gp=gpar(fontsize=8)), xmin = 0, xmax = 0.02 , ymin =0.18 , ymax = 0.19 ) +
+  annotation_custom(grob = textGrob(expression("-2"), gp=gpar(fontsize=8)), xmin = 0, xmax =0.02 , ymin =0.01 , ymax = 0.02 ) +
+  annotation_custom(grob = condition.legend, xmin = 0.9, xmax = 0.9, ymin= 0.1, ymax = 0.1)
 
-ggsave("language-grand-averages.png", plot=language.scalp, device = "png", path="figures/", width=8, height = 8, units = "in", dpi=300) 
+ggsave("language-grand-averages.png", plot=language.scalp, device = "png", path="figures/", width=8, height = 4, units = "in", dpi=300) 
 
 language.scalp
 ```
@@ -201,7 +201,7 @@ language.scalp
 
 Grand averages for music. 
 
-```{r fig.height=7, fig.width=8, message=FALSE, warning=FALSE}
+```{r fig.height=4, fig.width=8, message=FALSE, warning=FALSE}
 music.data <- plots %>% filter(stimulus.condition == "Music")
 music.scalp <- ggplot(music.data) + 
   geom_blank() +
@@ -212,19 +212,19 @@ for(i in 1:nrow(music.data)){
   
   music.scalp <- music.scalp + 
     annotation_custom( grob = ggplotGrob(music.data$plot[[i]]), xmin = music.data$x[[i]] - x.size/2, xmax = music.data$x[[i]] + x.size/2, ymin = music.data$y[[i]] - y.size/2, ymax = music.data$y[[i]] + y.size/2) +
-    annotation_custom(grob = textGrob(music.data$name[[i]]), xmin = music.data$x[[i]] - x.size/2, xmax = music.data$x[[i]] + x.size/2, ymin = music.data$y[[i]] + y.size/2, ymax = music.data$y[[i]] + y.size/2 + 0.02)
+    annotation_custom(grob = textGrob(music.data$name[[i]], just="center", gp=gpar(fontsize=10)), xmin = music.data$x[[i]] - x.size/2, xmax = music.data$x[[i]] + x.size/2, ymin = music.data$y[[i]] + y.size/2, ymax = music.data$y[[i]] + y.size/2 + 0.02)
 
 }
 
 music.scalp <- music.scalp + 
-  annotation_custom(grob = ggplotGrob(legend.plot), xmin = 1.0 - x.size, xmax=1.0, ymin = 0, ymax= y.size) +
-  annotation_custom(grob = textGrob("Time since stimulus onset (ms)", just="right", gp=gpar(fontsize=10)), xmin = .94, xmax =1.13 , ymin =-0.04 , ymax = -0.03 ) +
-  annotation_custom(grob = textGrob(expression("ERP amplitude ("*mu*"v)"), rot=90, gp=gpar(fontsize=10)), xmin = .74, xmax =.79 , ymin =0.04 , ymax = 0.1 ) +
-  annotation_custom(grob = textGrob(expression("+2"), gp=gpar(fontsize=8)), xmin = .80, xmax =.81 , ymin =0.12 , ymax = 0.13 ) +
-  annotation_custom(grob = textGrob(expression("-2"), gp=gpar(fontsize=8)), xmin = .80, xmax =.81 , ymin =0.02 , ymax = 0.03 ) +
-  annotation_custom(grob = condition.legend, xmin = 0.85, xmax = 1.0, ymin= 0.1, ymax = 0.25)
+  annotation_custom(grob = ggplotGrob(legend.plot), xmin = (0.1)-(x.size/2), xmax=0.1+(x.size/2), ymin = 0.1-y.size/2, ymax = 0.1+(y.size/2)) +
+  annotation_custom(grob = textGrob("Time since stimulus onset (ms)", just="center", gp=gpar(fontsize=8)), xmin = (2/16)-(x.size/2), xmax =(2/16)+(x.size/2) , ymin =-0.04 , ymax = -0.03 ) +
+  annotation_custom(grob = textGrob(expression("Amplitude ("*mu*"v)"), rot=90, gp=gpar(fontsize=8)), xmin = -0.03, xmax =0.0 , ymin =0.03 , ymax = 0.17 ) +
+  annotation_custom(grob = textGrob(expression("+2"), gp=gpar(fontsize=8)), xmin = 0, xmax = 0.02 , ymin =0.18 , ymax = 0.19 ) +
+  annotation_custom(grob = textGrob(expression("-2"), gp=gpar(fontsize=8)), xmin = 0, xmax =0.02 , ymin =0.01 , ymax = 0.02 ) +
+  annotation_custom(grob = condition.legend, xmin = 0.9, xmax = 0.9, ymin= 0.1, ymax = 0.1)
 
-ggsave("music-grand-averages.png", plot=music.scalp, device = "png", path="figures/", width=8, height = 8, units = "in", dpi=300) 
+ggsave("music-grand-averages.png", plot=music.scalp, device = "png", path="figures/", width=8, height = 4, units = "in", dpi=300) 
 
 music.scalp
 ```
@@ -356,7 +356,7 @@ difference.waves <- eeg.data %>%
 
 Plot of the difference waves.
 
-```{r fig.height=7, fig.width=8, message=FALSE, warning=FALSE}
+```{r fig.height=4, fig.width=8, message=FALSE, warning=FALSE}
 
 difference.wave.grand.average.data <- difference.waves %>% group_by(t, electrode, stimulus.condition) %>%
   summarize(mean.voltage = mean(difference.voltage), sd.voltage = sd(difference.voltage), se.voltage = sd.voltage / sqrt(n()))
@@ -365,15 +365,15 @@ dw.make.plot <- function(plotting.data){
   p <- ggplot(plotting.data, aes(x=t, y=mean.voltage, color=stimulus.condition))+
     scale_color_brewer(name="Stimulus Type", type="qual", palette="Set2", guide=F)+
     scale_fill_brewer(guide=F, type="qual", palette="Set2")+
-    annotate("rect", xmin=500,xmax=800,ymin=-2,ymax=2,fill='black',alpha=0.25)+
+    annotate("rect", xmin=500,xmax=800,ymin=-2,ymax=2,fill='black',alpha=0.2)+
     coord_cartesian(ylim=c(min(difference.wave.grand.average.data$mean.voltage - difference.wave.grand.average.data$se.voltage), max(difference.wave.grand.average.data$mean.voltage + difference.wave.grand.average.data$se.voltage)))+
-    geom_ribbon(mapping=aes(ymin=mean.voltage - se.voltage, ymax = mean.voltage + se.voltage, fill=stimulus.condition), color=NA, alpha = 0.4)+
     geom_line()+
     geom_vline(xintercept=0)+
     geom_hline(yintercept=0)+
     geom_segment(data = ticks, aes(x=x,y=y,xend=xend,yend=yend), color="black")+ 
     geom_segment(x=-50, y=2, xend=0,yend=2, color="black")+
     geom_segment(x=-50, y=-2, xend=0,yend=-2, color="black")+
+    geom_ribbon(mapping=aes(ymin=mean.voltage - se.voltage, ymax = mean.voltage + se.voltage, fill=stimulus.condition), color=NA, alpha = 0.4)+
     theme_void()
   return(p)
 }
@@ -383,7 +383,7 @@ dw.legend.plot <- ggplot(difference.wave.grand.average.data, aes(x=t, y=mean.vol
   theme_void()+
   geom_vline(xintercept=0)+
   geom_hline(yintercept=0)+
-  annotate("rect", xmin=500,xmax=800,ymin=-2,ymax=2,fill='black',alpha=0.25)+
+  annotate("rect", xmin=500,xmax=800,ymin=-2,ymax=2,fill='black',alpha=0.2)+
   scale_color_brewer(guide=F)+
   geom_segment(data = ticks, aes(x=x,y=y,xend=xend,yend=yend), color="black")+ 
   annotate("text", label="500", x=500, y = -1.0, size=3)+
@@ -393,7 +393,7 @@ dw.legend.plot <- ggplot(difference.wave.grand.average.data, aes(x=t, y=mean.vol
   coord_cartesian(ylim=c(min(difference.wave.grand.average.data$mean.voltage - difference.wave.grand.average.data$se.voltage), max(difference.wave.grand.average.data$mean.voltage + difference.wave.grand.average.data$se.voltage)), xlim=c(-100,1100))
 
 dw.condition.legend <- (ggplot(difference.wave.grand.average.data, aes(x=t,y=mean.voltage,color=stimulus.condition))+
-  geom_line()+
+  geom_line(size=1)+
   theme_minimal(base_size = 11)+
   scale_color_brewer(palette="Set2", type="seq", name=NULL)) %>%
   get_legend()
@@ -418,19 +418,19 @@ for(i in 1:nrow(dw.plots)){
   
   dw.scalp <- dw.scalp + 
     annotation_custom( grob = ggplotGrob(dw.plots$plot[[i]]), xmin = dw.plots$x[[i]] - x.size/2, xmax = dw.plots$x[[i]] + x.size/2, ymin = dw.plots$y[[i]] - y.size/2, ymax = dw.plots$y[[i]] + y.size/2) +
-    annotation_custom(grob = textGrob(dw.plots$name[[i]]), xmin = dw.plots$x[[i]] - x.size/2, xmax = dw.plots$x[[i]] + x.size/2, ymin = dw.plots$y[[i]] + y.size/2 - 0.02, ymax = dw.plots$y[[i]] + y.size/2 + 0.02)
+    annotation_custom(grob = textGrob(dw.plots$name[[i]], just="center", gp=gpar(fontsize=10)), xmin = dw.plots$x[[i]] - x.size/2, xmax = dw.plots$x[[i]] + x.size/2, ymin = dw.plots$y[[i]] + y.size/2 - 0.02, ymax = dw.plots$y[[i]] + y.size/2 + 0.02)
 
 }
 
 dw.scalp <- dw.scalp + 
-  annotation_custom(grob = ggplotGrob(dw.legend.plot), xmin = 1.0 - x.size, xmax=1.0, ymin = 0, ymax= y.size) +
-  annotation_custom(grob = textGrob("Time since stimulus onset (ms)", just="right", gp=gpar(fontsize=10)), xmin = .94, xmax =1.13 , ymin =-0.04 , ymax = -0.03 ) +
-  annotation_custom(grob = textGrob(expression("Amp. difference ("*mu*"v)"), rot=90, gp=gpar(fontsize=10)), xmin = .74, xmax =.79 , ymin =0.04 , ymax = 0.11 ) +
-  annotation_custom(grob = textGrob(expression("+2"), gp=gpar(fontsize=8)), xmin = .80, xmax =.81 , ymin =0.105 , ymax = 0.115 ) +
-  annotation_custom(grob = textGrob(expression("-2"), gp=gpar(fontsize=8)), xmin = .80, xmax =.81 , ymin =0.03 , ymax = 0.04 ) +
-  annotation_custom(grob = dw.condition.legend, xmin = 0.85, xmax = 1.0, ymin= 0.1, ymax = 0.25)
+  annotation_custom(grob = ggplotGrob(dw.legend.plot), xmin = (0.1)-(x.size/2), xmax=0.1+(x.size/2), ymin = 0.1-y.size/2, ymax = 0.1+(y.size/2)) +
+  annotation_custom(grob = textGrob("Time since stimulus onset (ms)", just="center", gp=gpar(fontsize=8)), xmin = (2/16)-(x.size/2), xmax =(2/16)+(x.size/2) , ymin =-0.04 , ymax = -0.03 ) +
+  annotation_custom(grob = textGrob(expression("Amp. diff. ("*mu*"v)"), rot=90, gp=gpar(fontsize=8)), xmin = -0.03, xmax =0.0 , ymin =0.03 , ymax = 0.17 ) +
+  annotation_custom(grob = textGrob(expression("+2"), gp=gpar(fontsize=8)), xmin = 0, xmax = 0.02 , ymin =0.18 , ymax = 0.19 ) +
+  annotation_custom(grob = textGrob(expression("-2"), gp=gpar(fontsize=8)), xmin = 0, xmax =0.02 , ymin =0.01 , ymax = 0.02 ) +
+  annotation_custom(grob = dw.condition.legend, xmin = 0.9, xmax = 0.9, ymin= 0.1, ymax = 0.1)
 
-ggsave("difference-waves-grand-averages.png", plot=dw.scalp, device = "png", path="figures/", width=8, height = 8, units = "in", dpi=300) 
+ggsave("difference-waves-grand-averages.png", plot=dw.scalp, device = "png", path="figures/", width=8, height = 4, units = "in", dpi=300) 
 
 dw.scalp
 ```

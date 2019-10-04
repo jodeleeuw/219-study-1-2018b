@@ -62,8 +62,3 @@ beh.data.subset <- beh.data %>%
                    (key_press == 85 & (syntax_cat == 'Ungrammatical' | syntax_cat == 'Distant-Key' | syntax_cat == 'Filler-Ungram'))))
 
 write_csv(beh.data.subset, path="data/generated/beh_data_tidy.csv")
-
-# Demographic Data ####
-
-dem.data <- read_csv('data/raw/demographics/demographics.csv')
-as.Date(dem.data$Birthdate, format="%m/%d/%Y")
